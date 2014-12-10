@@ -1,11 +1,12 @@
 package ro.szzsa.flashair.application;
 
-import org.apache.http.util.TextUtils;
-import ro.szzsa.flashair.configuration.Configuration;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import org.apache.http.util.TextUtils;
+
+import ro.szzsa.flashair.configuration.Configuration;
 
 /**
  *

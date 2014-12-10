@@ -1,35 +1,48 @@
 package ro.szzsa.flashair.application;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.http.util.TextUtils;
+
 import ro.szzsa.flashair.configuration.Configuration;
 import ro.szzsa.flashair.connector.ConnectorException;
 import ro.szzsa.flashair.connector.HttpConnector;
 import ro.szzsa.flashair.logging.Logger;
 import ro.szzsa.flashair.logging.LoggerFactory;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  *
  */
 public class Downloader {
 
-    private Logger log = LoggerFactory.createLogger(getClass());
+    private Logger log;
 
-    private Configuration config = Configuration.getInstance();
+    private Configuration config;
 
-    private HttpConnector connector = new HttpConnector();
+    private HttpConnector connector;
 
-    private Parser parser = new Parser();
+    private Parser parser;
 
-    private boolean stopped = false;
+    private boolean stopped;
+
+    public Downloader() {
+        log = LoggerFactory.createLogger(getClass());
+        config = Configuration.getInstance();
+        connector = new HttpConnector();
+        connector.setBufferSize(config.getDownloaderBufferSize());
+        connector.setConnectionTimeout(config.getDownloaderConnectionTimeout());
+        connector.setReadTimeout(config.getDownloaderReadTimeout());
+        connector.setConnectionRetryDelay(config.getDownloaderConnectionRetryDelay());
+        connector.setMaxConnectionRetryCount(config.getDownloaderMaxConnectionRetryCount());
+        parser = new Parser();
+    }
 
     public void start() {
         log.info("Starting FlashAir Downloader");
-        if (dirExists()) {
+        if (connector.dirExists(config.getDownloaderDestinationDirectory())) {
             while (!stopped) {
                 try {
                     String listUrl = config.getFlashairUrlBase() + "/command.cgi?op=100&DIR=" + config.getFlashairPictureDirectory();
@@ -38,7 +51,7 @@ public class Downloader {
                         if (!fileExists(picture.getName())) {
                             String downloadUrl =
                                 config.getFlashairUrlBase() + config.getFlashairPictureDirectory() + "/" + picture.getName();
-                            connector.downloadFile(downloadUrl, picture.getName());
+                            connector.downloadFile(downloadUrl, picture.getName(), config.getDownloaderDestinationDirectory());
                         }
                     }
                 } catch (ConnectorException e) {
@@ -79,22 +92,5 @@ public class Downloader {
             }
         }
         return false;
-    }
-
-    private boolean dirExists() {
-        boolean dirExists = false;
-        File destinationDir = new File(config.getDownloaderDestinationDirectory());
-        if (!destinationDir.exists() || !destinationDir.isDirectory()) {
-            try {
-                log.info("Creating destination directory");
-                dirExists = destinationDir.mkdir();
-                dirExists = true;
-            } catch (SecurityException e) {
-                log.error("Cannot create destination directory", e);
-            }
-        } else {
-            dirExists = true;
-        }
-        return dirExists;
     }
 }

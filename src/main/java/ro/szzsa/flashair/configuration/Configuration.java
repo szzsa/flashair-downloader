@@ -43,14 +43,6 @@ public final class Configuration {
         }
     }
 
-    public static Configuration getInstance() {
-        return instance;
-    }
-
-    private void loadProperties() throws IOException {
-        properties.load(new FileInputStream(CONFIG_FILE_PATH));
-    }
-
     public String getFlashairUrlBase() {
         return properties.getProperty(FLASHAIR_URL_BASE);
     }
@@ -89,5 +81,13 @@ public final class Configuration {
 
     public String getDownloaderLocalDirectories() {
         return properties.getProperty(DOWNLOADER_LOCAL_DIRECTORIES);
+    }
+
+    public static Configuration getInstance() {
+        return instance;
+    }
+
+    private void loadProperties() throws IOException {
+        properties.load(new FileInputStream(CONFIG_FILE_PATH));
     }
 }
