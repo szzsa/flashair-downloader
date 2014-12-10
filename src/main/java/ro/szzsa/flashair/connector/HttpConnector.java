@@ -70,39 +70,41 @@ public class HttpConnector {
 
     public void download(String url, String fileName, String dir) throws ConnectorException {
         log.info("Downloading file from " + url);
-        String path = TEMP_FOLDER_NAME + "/" + fileName;
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setConnectTimeout(connectionTimeout);
-            connection.setReadTimeout(readTimeout);
-            connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                try (InputStream input = connection.getInputStream();
-                     OutputStream output = new FileOutputStream(path)) {
-                    byte buffer[] = new byte[bufferSize];
-                    int count;
-                    while ((count = input.read(buffer)) != -1) {
-                        output.write(buffer, 0, count);
-                    }
-                } catch (Exception e) {
-                    throw new ConnectorException(e);
-                }
-                Files.copy(Paths.get(path), Paths.get(dir + "/" + fileName), StandardCopyOption.REPLACE_EXISTING);
-                log.info(fileName + " downloaded");
-            } else {
-                log.error("Cannot download file: status " + connection.getResponseCode());
-            }
-        } catch (Exception e) {
-            throw new ConnectorException(e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        if (dirExists(TEMP_FOLDER_NAME)) {
+            String temp = TEMP_FOLDER_NAME + "/" + fileName;
+            HttpURLConnection connection = null;
             try {
-                Files.deleteIfExists(Paths.get(TEMP_FOLDER_NAME + "/" + fileName));
-            } catch (IOException e) {
-                log.error("Cannot delete temporary file " + fileName, e);
+                connection = (HttpURLConnection) new URL(url).openConnection();
+                connection.setConnectTimeout(connectionTimeout);
+                connection.setReadTimeout(readTimeout);
+                connection.connect();
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    try (InputStream input = connection.getInputStream();
+                         OutputStream output = new FileOutputStream(temp)) {
+                        byte buffer[] = new byte[bufferSize];
+                        int count;
+                        while ((count = input.read(buffer)) != -1) {
+                            output.write(buffer, 0, count);
+                        }
+                    } catch (Exception e) {
+                        throw new ConnectorException(e);
+                    }
+                    Files.copy(Paths.get(temp), Paths.get(dir + "/" + fileName), StandardCopyOption.REPLACE_EXISTING);
+                    log.info(fileName + " downloaded");
+                } else {
+                    log.error("Cannot download file: status " + connection.getResponseCode());
+                }
+            } catch (Exception e) {
+                throw new ConnectorException(e);
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    Files.deleteIfExists(Paths.get(temp));
+                } catch (IOException e) {
+                    log.error("Cannot delete temporary file " + fileName, e);
+                }
             }
         }
     }
