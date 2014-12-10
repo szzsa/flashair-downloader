@@ -13,6 +13,7 @@
         <commons.io.version>2.4</commons.io.version>
         <apache.httpcomponents.version>4.3.5</apache.httpcomponents.version>
         <language.level>1.7</language.level>
+        <log4j.version>1.2.17</log4j.version>
     </properties>
 
     <dependencies>
@@ -26,6 +27,11 @@
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -35,7 +41,8 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>**</exclude>
+                    <exclude>config.properties</exclude>
+                    <exclude>run.bat</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -93,6 +100,9 @@
                                 <resource>
                                     <directory>${project.basedir}/src/main/resources</directory>
                                     <filtering>false</filtering>
+                                    <excludes>
+                                        <exclude>log4j.properties</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>

@@ -6,19 +6,20 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
 
 import ro.szzsa.flashair.configuration.Configuration;
 import ro.szzsa.flashair.connector.ConnectorException;
 import ro.szzsa.flashair.connector.HttpConnector;
-import ro.szzsa.flashair.logging.Logger;
-import ro.szzsa.flashair.logging.LoggerFactory;
 
 /**
  *
  */
 public class Downloader {
 
-    private Logger log;
+    private static final String LIST_URL_PATH = "/command.cgi?op=100&DIR=";
+
+    static Logger log;
 
     private Configuration config;
 
@@ -29,7 +30,7 @@ public class Downloader {
     private boolean stopped;
 
     public Downloader() {
-        log = LoggerFactory.createLogger(getClass());
+        log = Logger.getLogger(getClass().getName());
         config = Configuration.getInstance();
         connector = new HttpConnector();
         connector.setBufferSize(config.getDownloaderBufferSize());
@@ -45,7 +46,7 @@ public class Downloader {
         if (connector.dirExists(config.getDownloaderDestinationDirectory())) {
             while (!stopped) {
                 try {
-                    String listUrl = config.getFlashairUrlBase() + "/command.cgi?op=100&DIR=" + config.getFlashairPictureDirectory();
+                    String listUrl = config.getFlashairUrlBase() + LIST_URL_PATH + config.getFlashairPictureDirectory();
                     log.info("Retrieving the list of pictures");
                     for (Picture picture : parser.parseList(connector.doRequest(listUrl))) {
                         if (!fileExists(picture.getName())) {

@@ -16,9 +16,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-
-import ro.szzsa.flashair.logging.Logger;
-import ro.szzsa.flashair.logging.LoggerFactory;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -37,17 +35,26 @@ public class HttpConnector {
 
     private static final int DEFAULT_MAX_CONNECTION_RETRY_COUNT = 2;
 
-    private Logger log = LoggerFactory.createLogger(getClass());
+    private Logger log;
 
-    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+    private int connectionTimeout;
 
-    private int readTimeout = DEFAULT_READ_TIMEOUT;
+    private int readTimeout;
 
-    private int bufferSize = DEFAULT_BUFFER_SIZE;
+    private int bufferSize;
 
-    private int connectionRetryDelay = DEFAULT_CONNECTION_RETRY_DELAY;
+    private int connectionRetryDelay;
 
-    private int maxConnectionRetryCount = DEFAULT_MAX_CONNECTION_RETRY_COUNT;
+    private int maxConnectionRetryCount;
+
+    public HttpConnector() {
+        log = org.apache.log4j.Logger.getLogger(getClass().getName());
+        connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+        readTimeout = DEFAULT_READ_TIMEOUT;
+        bufferSize = DEFAULT_BUFFER_SIZE;
+        connectionRetryDelay = DEFAULT_CONNECTION_RETRY_DELAY;
+        maxConnectionRetryCount = DEFAULT_MAX_CONNECTION_RETRY_COUNT;
+    }
 
     public String doRequest(final String url) throws Exception {
         return handleConnection(new Connection() {
@@ -86,11 +93,11 @@ public class HttpConnector {
                         while ((count = input.read(buffer)) != -1) {
                             output.write(buffer, 0, count);
                         }
+                        Files.copy(Paths.get(temp), Paths.get(dir + "/" + fileName), StandardCopyOption.REPLACE_EXISTING);
+                        log.info(fileName + " downloaded");
                     } catch (Exception e) {
                         throw new ConnectorException(e);
                     }
-                    Files.copy(Paths.get(temp), Paths.get(dir + "/" + fileName), StandardCopyOption.REPLACE_EXISTING);
-                    log.info(fileName + " downloaded");
                 } else {
                     log.error("Cannot download file: status " + connection.getResponseCode());
                 }
