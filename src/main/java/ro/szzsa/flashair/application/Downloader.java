@@ -54,23 +54,30 @@ public class Downloader {
                             connector.downloadFile(downloadUrl, picture.getName(), config.getDownloaderDestinationDirectory());
                         }
                     }
+                    log.info("The list of pictures was parsed");
                 } catch (ConnectorException e) {
                     log.error("Cannot connect to the server " + e.getMessage());
                 } catch (Exception e) {
                     log.error("Unexpected exception", e);
                     stopped = true;
                 } finally {
-                    if (!stopped) {
-                        try {
-                            Thread.sleep(config.getDownloaderListCheckDelay());
-                        } catch (InterruptedException e) {
-                            log.error("Delay interrupted");
-                        }
-                    }
+                    delayListCheck();
                 }
             }
         } else {
             log.error("Destination directory doesn't exist");
+        }
+    }
+
+    private void delayListCheck() {
+        if (!stopped) {
+            try {
+                int delay = config.getDownloaderListCheckDelay();
+                log.info("Waiting " + String.valueOf(delay) + " milliseconds for the next request");
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                log.error("Delay interrupted");
+            }
         }
     }
 
