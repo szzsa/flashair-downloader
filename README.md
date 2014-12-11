@@ -1,4 +1,4 @@
 flashair-downloader
 ===================
 
-Client for FlashAir™ SD Card with Embedded Wireless LAN
+**flashair-downloader** is a client for [FlashAir™](http://www.toshiba-components.com/FlashAir) - SD Card with Embedded Wireless LAN.
